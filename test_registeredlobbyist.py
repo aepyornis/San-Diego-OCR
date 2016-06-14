@@ -1,4 +1,8 @@
 import unittest
+import tempfile
+
+from unittest.mock import patch
+import registeredlobbyist
 from registeredlobbyist import *
 
 class Test_lobbyist_re(unittest.TestCase):
@@ -24,11 +28,93 @@ class Test_lobbyist_re(unittest.TestCase):
         self.assertIsNone(lobbyist_re.search(line3))
         
 
+
+
+class Test_lobbyist_groups_re(unittest.TestCase):
+    
+    def test_line1(self):
+        line = "Harris, Sondra M. 668 Board of Supervisors, DPLU, BPZA, PERB, CAO, Asst. CAO, Board Reps."
+        m = lobbyist_groups_re.match(line)
+        
+        self.assertEqual(m.group(1), "Harris, Sondra M.")
+        self.assertEqual(m.group(2), "668")
+        self.assertEqual(m.group(3), "Board of Supervisors, DPLU, BPZA, PERB, CAO, Asst. CAO, Board Reps.")
+        
+
+    def test_line2(self):
+        line = "Reilly, James 1016 County Treasurer—Tax Collector"
+        m = lobbyist_groups_re.match(line)
+
+        self.assertEqual(m.group(1), "Reilly, James")
+        self.assertEqual(m.group(2), "1016")
+        self.assertEqual(m.group(3), "County Treasurer—Tax Collector")
+
+    def test_line3_catches_l_in_reg(self):
+        line = "Capretz, Nicole l012 Board of Supervisors"
+        m = lobbyist_groups_re.match(line)
+        
+        self.assertEqual(m.group(1), "Capretz, Nicole")
+        self.assertEqual(m.group(2), "l012")
+        self.assertEqual(m.group(3), "Board of Supervisors")
+        
+            
+class Test_good_line_to_csv(unittest.TestCase):
+    
+    def test_line_without_brackets(self):
+        line = "Reilly, James 1016 County Treasurer—Tax Collector"
+        csv = good_line_to_csv(line)
+        self.assertEqual(csv, "Reilly, James|1016|County Treasurer—Tax Collector")
+
+    def test_line_with_brackets(self):
+        line = "Reilly, James [0]6 County Treasurer—Tax Collector"
+        csv = good_line_to_csv(line)
+        self.assertEqual(csv, "Reilly, James|1016|County Treasurer—Tax Collector")
+
 class Test_good_line(unittest.TestCase):
 
     def test_false_if_blank_or_new_line(self):
         self.assertEqual(good_line(''), False)
         self.assertEqual(good_line('\n'), False)
+
+
+    def test_good_line(self):
+        line1 = "Harris, Sondra M. 668 Board of Supervisors, DPLU, BPZA, PERB, CAO, Asst. CAO, Board Reps."
+        self.assertTrue(good_line(line1))
+
+
+class Test_line_loop(unittest.TestCase):
+
+    @patch.object(registeredlobbyist, 'process_line')
+    def test_end_of_file(self, mock):
+        with tempfile.TemporaryFile(mode='r') as fp:
+            line_loop(fp)
+            self.assertFalse(mock.called)
+
+    @patch.object(registeredlobbyist, 'process_line')
+    def test_good_line_followed_by_blank(self, mock):
+        
+        with tempfile.TemporaryFile(mode='w+') as fp:
+            
+            fp.write("Whalen, James E. 736 Board of Supervisors, Director of PDS, BOS Reps., Planning Comm, Deputy CAO")
+            fp.write("\n")
+            fp.seek(0)
+            
+            line_loop(fp)
+            self.assertTrue(mock.called)
+
+    @patch.object(registeredlobbyist, 'process_line')
+    def test_good_line_followed_by_more_info(self, mock):
+        
+        with tempfile.TemporaryFile(mode='w+') as fp:
+            
+            fp.write("Whalen, James 736 Board of Supervisors\n")
+            fp.write("HHSA")
+            fp.write("\n")
+            fp.seek(0)
+            line_loop(fp)
+            self.assertTrue(mock.called)
+            self.assertEqual(mock.call_args[0][0], "Whalen, James 736 Board of Supervisors HHSA")
+
 
 
 if __name__ == '__main__':
