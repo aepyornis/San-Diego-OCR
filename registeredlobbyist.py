@@ -1,10 +1,10 @@
 """
 Process the registeredlobbyist file from San Diego County.
 
-pdf to tif: convert -density 300 -depth 8 registeredlobbyist.pdf lobbyist.
+pdf to tif: convert -density 300 -depth 8 registeredlobbyist.pdf lobbyist
 tif to text:  tesseract -psm 4 lobbyist.tif lobbyist
-text to csv: python3 registeredlobbyist.py > registeredlobbyist.csv
-
+text to csv: python3 registeredlobbyist.py 
+outputs: lobbyists.csv
 """
 import re
 
@@ -15,7 +15,8 @@ OUT_FILE = 'lobbyists.csv'
 LOBBYIST_LINE_PATTERN = """
 ^              # beginning of string
 .+             # anything
-[,]            # comma
+[,.]           # comma or a period
+[ ]+           # space 
 .+             # anything  
 [0-9l\]\[]{2,3} # 2-4 digital number or bracket, sometimes 1 becomes a []
 [ ]            # space
@@ -37,10 +38,27 @@ $              # end
 
 lobbyist_groups_re = re.compile(LOBBYIST_GROUPS_PATTERN, re.I|re.X)
 
+
 def write_headers():
     with open(OUT_FILE, 'w') as f:
         f.write('name|reg|officials')
         f.write('\n')
+
+def start_line(l):
+    """
+    Returns true if line contains "Lobbyist" and "Registrant" and "Name" and "reg"
+    """
+    if (
+            re.search("Lobbyist", l, flags=re.I) and 
+            re.search("Registrant", l, flags=re.I) and
+            re.search("Name", l, flags=re.I) and
+            re.search("reg", l, flags=re.I)
+    ):
+        return True
+    else:
+        return False
+    
+
 
 def good_line(l):
     if lobbyist_re.search(l) is None:
@@ -93,6 +111,11 @@ def line_loop(f):
 def main():
     write_headers()
     with open(FILE_PATH, 'r') as f:
+        for line in f:
+            if start_line(line):
+                break
+            else:
+                pass
         line_loop(f)
 
 if __name__ == '__main__':

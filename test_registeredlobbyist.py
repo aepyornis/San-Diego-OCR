@@ -116,6 +116,24 @@ class Test_line_loop(unittest.TestCase):
             self.assertEqual(mock.call_args[0][0], "Whalen, James 736 Board of Supervisors HHSA")
 
 
+class Test_start_line(unittest.TestCase):
+    
+    def test_is_start_line(self):
+        line = "Lobbyist/Registrant Name Reg # Elective County Office/Ofﬁcial *"
+        self.assertTrue(start_line(line))
 
+    def test_is_not_start_line(self):
+        lines = [
+            "DAVID HALL. CCB CLERK OF THE BOARD OF SUPERVISORS ANDREW POTTER",
+            "EXECUT'VE mam Isoo PACIFIC HIGHWAY. ROOM 402. SAN DIEGO. CALIFORNIA 92101-2471",
+            "Ernest J. Dronenburg J r., Assessor/RecorderlCounty Clerk",
+            "lobbyist and the elective ofﬁces/officials that the lobbyists will attempt to inﬂuence.",
+            "SAN DIEGO COUNTY REGISTERED LOBBYISTS"
+        ]
+        
+        for l in lines:
+            self.assertFalse(start_line(l))
+        
+    
 if __name__ == '__main__':
     unittest.main()
