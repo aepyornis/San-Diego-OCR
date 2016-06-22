@@ -2,111 +2,131 @@
 Process the firmsepresented file from San Diego County
 
 pdf to tif: convert -density 300 -depth 8 firmsrepresented.pdf firmsrepresented.tif
-tif to text: tessaract -psm 6 firmsrepresented.tif firmsrepresented
-text to csv: python3 firmsrepresented.py
+tif to text: tesseract -psm 6 firmsrepresented.tif firmsrepresented
+text to csv: python3 firmsrepresented.Pu
+
 """
 import re
+import json
 
-FILE_PATH = './firmsrepresented/firmsrepresented_6.txt'
-OUT_FILE = 'firmsrepresented.csv'
+# [{}]
+# each dictionary: {
+#  name: '',
+#  firms: [{}]
+# }
+# 
+lobbyists = []
 
+def last_name(n):
+    if ',' in n:
+        return n.split(',')[0]
+    elif '.' in n:
+        return n.split('.')[0]
+    else:
+        return n
 
-def lobbyists(fp):
-    """Returns names of lobbyists from file"""
-    names = []
-    with open(fp, 'r') as f:
-        next(f)  # skip header
-        for line in f:
-             names.append(line.split('|')[0])
-    return names
+def get_lobbyist_names(file_path):
+    with open(file_path, 'r') as f:
+        next(f)
+        names = list(map(lambda x: x.split('|')[0], f.read().split('\n')))
+        return ",".join([last_name(n) for n in names]).lower()
     
 
-def start_line(l):
-    """
-    Returns true if the the line starts with "Lobbyist Name"
-    """
-    regex = r"^Lobbyist Name.+"
-    return (re.match(regex, l, flags=re.I) is not None)
+lobbyist_names = get_lobbyist_names('./lobbyists.csv')
 
-def end_line(l):
-    """
-    Note: " List of the name(s) of the Elective County Office(s)IOl‘t'ieial(s) the Lobbyists will try to inﬂuence Page I 7 of 18
-    """
-    pass
-
-def last_name(name):
-    if 
-    try:
-        return name[0:name.index(',')]
-    except ValueError:
-         return name[0:name.index('.')]
-    except ValueError:
-        return ''
+def is_lobbyist(text):
+    name = last_name(text).lower()
+    return (name in lobbyist_names)
 
 
-def lower_last_names(names):
-    """
-    list of names -> list of last names lowerccased
-    """
-    return list(map(lambda x: last_name(x.lower()),names))
+def new_lobbyist():
+    l = {}
+    l['firms'] = []
+    return l
 
-LOBBYISTS = lobbyists('./lobbyists.csv')
-def is_lobbyist(name):
-    names = lower_last_names(LOBBYISTS)
-    
-    if len([x for x in names if last_name(name).lower() in names]) > 0:
+
+
+def is_garbage(line):
+    if ("ATTACHMENT B" in line 
+        or
+        "REGISTERED LOBBYISTS AND" in line
+        or 
+        "compiled by the Clerk" in line
+        or
+        "Lobbyists will try to inﬂuence" in line
+        or 
+        "Note:" in line
+        or
+        "Lobbyist Name Reg" in line):
         return True
     else:
         return False
 
 
-def is_name(l):
-    """
-    Returns true if the line is a lobbyist's name
-    """
-    pass
+def is_corp_info(x):
+    is_digit = lambda x: x in ['0','1', '2', '3', '4', '5', '6', '7', '8', '9']
+    try: 
+        return (is_digit(x[0]) and is_digit(x[1])) 
+    except:
+        print('is_corp_info called with', x)
+        raise
+
+def record_lobbyist(lobbyist):
+    if lobbyist != {}:
+        lobbyists.append(lobbyist)
+
+def is_blank_line(x):
+    return x == ""
 
 
-def line_loop(f):
-    """
-    General detection pattern:
+def save():
+    with open('firmsepresented.json', 'w') as f:
+        f.write(json.dumps(lobbyists, indent=4))
+
+
+# text: array of lines
+# lobbyist: dictionary
+def parser(text, lobbyist, prior_corp=False):
+    if len(text) == 0:
+        return None  # base case
+    elif is_blank_line(text[0]):
+        return parser(text[1:], lobbyist, prior_corp=prior_corp)  # ignore line
+    elif is_lobbyist(text[0]):
+        record_lobbyist(lobbyist)       # lobbyist record finished. record it.
+        lobbyist = new_lobbyist()       # make new lobbyist dictionary
+        lobbyist['name'] = text[0]      # add name to lobbyist
+        return parser(text[1:], lobbyist)
+    elif is_corp_info(text[0]):
+        corp_info = {'info': text[0]}
+        lobbyist['firms'].append(corp_info)
+        return parser(text[1:], lobbyist, prior_corp=True)
+    elif is_garbage(text[0]):
+        return parser(text[1:], lobbyist, prior_corp=prior_corp) # ignore line 
+    elif prior_corp:
+        # add additional info
+        lobbyist['firms'][len(lobbyist['firms']) - 1]['more_info'] = text[0]
+        return parser(text[1:], lobbyist, prior_corp=True)
+    else:
+        return parser(text[1:], lobbyist)
     
-    Is Lobbyist ->
-       record lobbyist info
-       Next line ->
-           if firm represtned?
-               record.
-                next line ->
-                  is another firm?
-                     reocrd, continue
-                  is not a lobbyist?
-                     append info to firm represtened
-                  is page divider?
-                     skip
-                  is lobbyist?
-                      done.
-    """
-    while True:
-        line = f.readline()
-        if line == "":
-            break
-        elif is_lobbyist(l):
-            pass
-        else:
-            pass
-
-
-def main():
-    with open(FILE_PATH, 'r') as f:
-        for line in f:
-            if start_line(line):
-                break
-            else:
-                pass
-
-        line_loop(f)
-
 if __name__ == '__main__':
-    main()                      
-    # lobbyists('./lobbyists.csv') 
+    with open('firmsrepresented.txt', 'r') as f:
+        parser(f.read().split('\n'), {})
+        print('recorded', len(lobbyists), 'lobbyists')
+        save()
 
+# def start_line(l):
+#     """
+#     Returns true if  the line starts with "Lobbyist Name"
+#     """
+#     regex = r"^Lobbyist Name.+"
+#     return (re.match(regex, l, flags=re.I) is not None)
+
+
+# def page_break(l):
+#     """
+#     Returns true if the line is a line indicating a new page
+#     ATTACHMENT B
+#     """
+#     pass
+nnn
