@@ -114,5 +114,56 @@ class Test_last_name(unittest.TestCase):
          self.assertEqual(last_name(n), "Milch")
         
 
+class Test_split_info(unittest.TestCase):
+    
+    def test_extracts_name(self):
+        self.assertEqual(
+            split_info("784 Bearing Point County Treasurer-Tax Collector")[1],
+            "Bearing Point County"
+        )
+        self.assertEqual(
+            split_info("786 Mary McGuire Board of Supervisors, PDS")[1],
+            "Mary McGuire"
+        )
+        
+        self.assertEqual(
+            split_info("866 Paci\ufb01ca Enterprises, Inc. BOS, BOS Reps., BOS Staff, CAO & Directors of Planning &")[1],
+            "Paci\ufb01ca Enterprises, Inc."
+        )
+
+    def test_extract_num(self):
+        self.assertEqual(
+            split_info("784 Bearing Point County Treasurer-Tax Collector")[0],
+            "784")
+        self.assertEqual(
+            split_info("786 Mary McGuire Board of Supervisors, PDS")[0],
+            "786")
+        
+        self.assertEqual(
+            split_info("866 Paci\ufb01ca Enterprises, Inc. BOS, BOS Reps., BOS Staff, CAO & Directors of Planning &")[0],
+            "866")
+        
+
+    # def test_extracts_targets
+
+    def test_extract_num(self):
+        self.assertEqual(
+            split_info("784 Bearing Point County Treasurer-Tax Collector")[2],
+            "Treasurer-Tax Collector")
+        self.assertEqual(
+            split_info("786 Mary McGuire Board of Supervisors, PDS")[2],
+            "Board of Supervisors, PDS")
+        
+        self.assertEqual(
+            split_info("866 Paci\ufb01ca Enterprises, Inc. BOS, BOS Reps., BOS Staff, CAO & Directors of Planning &")[2],
+            "BOS, BOS Reps., BOS Staff, CAO & Directors of Planning &")
+    
+
+    def test_raises_excpetion_when_no_target_found(self):
+        with self.assertRaises(Exception):
+            split_info('666 the devil, inc. god')
+
+
 if __name__ == '__main__':
     unittest.main()
+ 

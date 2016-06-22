@@ -19,6 +19,7 @@ firm: {
 
 """
 import json
+from search_terms import search_terms
 
 lobbyists = []
 
@@ -96,6 +97,21 @@ def total_firms():
     return sum([len(x['firms']) for x in lobbyists])
 
 
+def split_info(info):
+    x = info.lower()
+    index_of_terms = [x.find(term) for term in search_terms if x.find(term) != -1]
+    if len(index_of_terms) == 0:
+        raise Exception('No matching target found: \n' + info + '\n')
+    start_of_targets = min(index_of_terms)
+    index_of_first_space = x.find(' ')
+    
+    number = info[:index_of_first_space]
+    corp_name = info[(index_of_first_space + 1):(start_of_targets - 1)]
+    targets = info[start_of_targets:]
+
+    return (number, corp_name, targets)
+    
+
 # text: array of lines
 # lobbyist: dictionary
 def parser(text, lobbyist, prior_corp=False):
@@ -124,6 +140,7 @@ def parser(text, lobbyist, prior_corp=False):
 if __name__ == '__main__':
     with open('firmsrepresented.txt', 'r') as f:
         parser(f.read().split('\n'), {})
+        save()
         print('Recorded', len(lobbyists), 'lobbyists')
         print('Total firms:', total_firms())
-        save()
+        
