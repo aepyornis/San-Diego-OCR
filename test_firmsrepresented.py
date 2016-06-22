@@ -164,6 +164,12 @@ class Test_split_info(unittest.TestCase):
             split_info('666 the devil, inc. god')
 
 
+class Test_csv_pipe_warning(unittest.TestCase):
+    def test_raises(self):
+        with self.assertRaises(Exception):
+            csv_pipe_warning('blahblah|blah')
+
+
 if __name__ == '__main__':
     unittest.main()
  

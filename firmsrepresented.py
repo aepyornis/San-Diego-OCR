@@ -97,6 +97,11 @@ def total_firms():
     return sum([len(x['firms']) for x in lobbyists])
 
 
+def csv_pipe_warning(x):
+    if x.find('|') != -1:
+        raise Exception('File contains a |')
+
+
 def split_info(info):
     x = info.lower()
     index_of_terms = [x.find(term) for term in search_terms if x.find(term) != -1]
