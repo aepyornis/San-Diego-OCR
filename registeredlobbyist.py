@@ -1,8 +1,12 @@
 """
 Process the registeredlobbyist file from San Diego County.
 
-pdf to tif: convert -density 300 -depth 8 registeredlobbyist.pdf lobbyist
+pdf to tif: convert -density 300 -depth 8 registeredlobbyist.pdf lobbyist.tif
 tif to text:  tesseract -psm 4 lobbyist.tif lobbyist
+
+note: at this step you *may* have to manually fix one or two names 
+      if errors occur with the python script.
+
 text to csv: python3 registeredlobbyist.py 
 outputs: lobbyists.csv
 """
