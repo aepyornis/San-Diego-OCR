@@ -1,20 +1,25 @@
 """
-Process the firmsepresented file from San Diego County
+Process firmsrepresented.pdf from San Diego County
+
 
 pdf to tif: convert -density 300 -depth 8 firmsrepresented.pdf firmsrepresented.tif
 tif to text: tesseract -psm 6 firmsrepresented.tif firmsrepresented
 text to csv: python3 firmsrepresented.Pu
 
+lobbyist: {
+  name: string,
+  firms: list
+}
+
+firm: {
+   info: string
+   more_info: string [optional]
+}
+
+
 """
-import re
 import json
 
-# [{}]
-# each dictionary: {
-#  name: '',
-#  firms: [{}]
-# }
-# 
 lobbyists = []
 
 def last_name(n):
@@ -25,6 +30,7 @@ def last_name(n):
     else:
         return n
 
+
 def get_lobbyist_names(file_path):
     with open(file_path, 'r') as f:
         next(f)
@@ -33,6 +39,7 @@ def get_lobbyist_names(file_path):
     
 
 lobbyist_names = get_lobbyist_names('./lobbyists.csv')
+
 
 def is_lobbyist(text):
     name = last_name(text).lower()
@@ -43,7 +50,6 @@ def new_lobbyist():
     l = {}
     l['firms'] = []
     return l
-
 
 
 def is_garbage(line):
@@ -71,17 +77,23 @@ def is_corp_info(x):
         print('is_corp_info called with', x)
         raise
 
+
 def record_lobbyist(lobbyist):
     if lobbyist != {}:
         lobbyists.append(lobbyist)
+
 
 def is_blank_line(x):
     return x == ""
 
 
 def save():
-    with open('firmsepresented.json', 'w') as f:
+    with open('firmsrepresented.json', 'w') as f:
         f.write(json.dumps(lobbyists, indent=4))
+
+
+def total_firms():
+    return sum([len(x['firms']) for x in lobbyists])
 
 
 # text: array of lines
@@ -112,21 +124,6 @@ def parser(text, lobbyist, prior_corp=False):
 if __name__ == '__main__':
     with open('firmsrepresented.txt', 'r') as f:
         parser(f.read().split('\n'), {})
-        print('recorded', len(lobbyists), 'lobbyists')
+        print('Recorded', len(lobbyists), 'lobbyists')
+        print('Total firms:', total_firms())
         save()
-
-# def start_line(l):
-#     """
-#     Returns true if  the line starts with "Lobbyist Name"
-#     """
-#     regex = r"^Lobbyist Name.+"
-#     return (re.match(regex, l, flags=re.I) is not None)
-
-
-# def page_break(l):
-#     """
-#     Returns true if the line is a line indicating a new page
-#     ATTACHMENT B
-#     """
-#     pass
-nnn

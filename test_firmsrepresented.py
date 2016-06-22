@@ -1,9 +1,8 @@
 import unittest
-import tempfile
-from unittest.mock import patch
-import firmsrepresented
-from firmsrepresented import *
+# import tempfile
+# from unittest.mock import patch
 
+from firmsrepresented import *
 
 class Test_new_lobbyist(unittest.TestCase):
     
@@ -76,6 +75,7 @@ class Test_is_corp_info(unittest.TestCase):
         ]
         for line in lines:
             self.assertFalse(is_corp_info(line))
+
         
 class Test_is_garbage(unittest.TestCase):
     
@@ -90,7 +90,6 @@ class Test_is_garbage(unittest.TestCase):
         ]
 
         for x in garbage:
-            print(x)
             self.assertTrue(is_garbage(x))
     
     def test_not_garbage(self):
@@ -103,29 +102,6 @@ class Test_is_garbage(unittest.TestCase):
         for x in ok:
             self.assertFalse(is_garbage(x))
 
-# class Test_start_line(unittest.TestCase):
-
-#     def test_is_start_line(self):
-#         line = "Lobbyist Name Reg # Firm Represented Elective County OfﬁceIOfﬁcial *"
-#         self.assertTrue(start_line(line))
-
-#     def test_is_not_start_line(self):
-#         line1 = "DAVID HALL. COB CLERK OF THE BOARD OF SUPERVISORS ANDREW POTTER"
-#         line2 = "REGISTERED LOBBYISTS AND FIRMS REPRESENTED"3w2222222222222222                                        22222222222222222222222222222222222222222222222222222
-#         self.assertFalse(start_line(line1))
-#         self.assertFalse(start_line(line2))
-
-
-# cla2ss Test_page_break(unittest.TestCase):
-
-#     def test_note(self):
-#         line = "Note:  List of the name(s) of the Elective County Ol'l'ice(s)IOfﬁciul(s) the Lobbyists will try to inﬂuence Page I of 18"
-#         self.assertTrue(page_break(line))
-
-#     def test_attachment(self):
-#         line = "ATTACHMENT B"
-# :        self.assertTrue(line)
-
 
 class Test_last_name(unittest.TestCase):
 
@@ -137,47 +113,6 @@ class Test_last_name(unittest.TestCase):
          n = "Milch. James S."
          self.assertEqual(last_name(n), "Milch")
         
-
-    
-# class Test_lower_last_name(unittest.TestCase):
-
-#     def test_lower_last(self):
-#         names = [
-#              "Bowling, Dennis C.", 
-#              "Bowman-Styles, Molly", 
-#              "Cason. Elizabeth"
-#         ]
-        
-#         self.assertEqual(lower_last_names(names), ["bowling", "bowman-styles", "cason"])
-        
-
-
-# class Test_is_name(unittest.TestCase):
-#     """"""
-#     def test_is_name(self):
-#         names = [
-#             "Bowling, Dennis C.", 
-#             "Bowman-Styles. Molly", 
-#             "Cason, Elizabeth",
-#             "Falcon. Clarissa Reyes",
-#             "Kilkenny, Kim J.",
-#             "Bryant III, John R."
-#         ]
-        
-#         for n in names:
-#             self.assertTrue(is_name(n))
-
-#     def test_is_not_name(self):
-#         not_names = [
-#             "Jones Engineering",
-#             "1015 Barclays Capital, Inc. County Treasurer~Tax Collector",
-#             "Management Ltd.",
-#             "Park, LLC",
-#             "dba Father Joe's Villages",
-            
-#         ]
-    
-    
 
 if __name__ == '__main__':
     unittest.main()
