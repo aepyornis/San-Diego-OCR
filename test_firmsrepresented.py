@@ -19,7 +19,8 @@ class Test_is_lobbyist(unittest.TestCase):
              "Adams. Matthew John",
              "Custar, Kristin",
              "Milch, James S.",
-             "Stream, Theodore"
+             "Stream, Theodore",
+             "Addis-Mills, A"
           ]
 
          for n in names:

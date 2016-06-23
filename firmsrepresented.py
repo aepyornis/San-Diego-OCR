@@ -164,6 +164,8 @@ def lobbyists_missing():
     lobbyist_in_firms_dataset = set([last_name(l['name']).lower() for l in lobbyists])
     return names - lobbyist_in_firms_dataset
 
+def replace_weird_chars(text):
+    return text.replace('\ufb01', 'fi').replace('—', '-')
 
 # text: array of lines
 # lobbyist: dictionary
@@ -193,7 +195,7 @@ def parser(text, lobbyist, prior_corp=False):
 
 def main():
     with open('firmsrepresented.txt', 'r') as f:
-        text = f.read()
+        text = replace_weird_chars(f.read())
         csv_pipe_warning(text)
         parser(text.split('\n'), {})
         update_lobbyists()
@@ -205,3 +207,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
