@@ -1,15 +1,23 @@
 search_terms = [
     "san diego county employees",
+    "san diego employees",
+    "san diego employees retirement",
+    "county of san diego deferred compensation program",
     "bos",
     "board of",
-    "da"
+    "sd board of",
+    "da",
     "cao",
+    "apcd",
     "bpza",
     "perb",
     "lafco",
     "planning comm",
-    "asst. cao"
+    "purchasing & contracting",
+    "director of purchasing",
+    "asst. cao",
     "director of",
+    "and land use",
     "ofﬁce of the district attorney",
     "human resources",
     "probation",
@@ -18,8 +26,11 @@ search_terms = [
     "sdcera",
     "sherrif",
     "sherrif's",
+    "sheriffs dept",
     "recorder/clerk",
+    "employees retirement system",
     "treasurer",
+    "atty.",
     "treasurer-tax",
     "county treasurer—tax collector",
     "planning",
@@ -27,6 +38,7 @@ search_terms = [
     "assessor",
     "land use",
     "dpw",
-    "members of planning commission"
+    "members of planning commission",
+    "directors of planning"
 ]
 

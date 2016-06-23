@@ -23,6 +23,7 @@ from search_terms import search_terms
 
 lobbyists = []
 
+
 def last_name(n):
     if ',' in n:
         return n.split(',')[0]
@@ -54,16 +55,11 @@ def new_lobbyist():
 
 
 def is_garbage(line):
-    if ("ATTACHMENT B" in line 
-        or
-        "REGISTERED LOBBYISTS AND" in line
-        or 
-        "compiled by the Clerk" in line
-        or
-        "Lobbyists will try to inﬂuence" in line
-        or 
-        "Note:" in line
-        or
+    if ("ATTACHMENT B" in line or
+        "REGISTERED LOBBYISTS AND" in line or 
+        "compiled by the Clerk" in line or
+        "Lobbyists will try to inﬂuence" in line or 
+        "Note:" in line or
         "Lobbyist Name Reg" in line):
         return True
     else:
@@ -71,7 +67,7 @@ def is_garbage(line):
 
 
 def is_corp_info(x):
-    is_digit = lambda x: x in ['0','1', '2', '3', '4', '5', '6', '7', '8', '9']
+    is_digit = lambda x: x in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     try: 
         return (is_digit(x[0]) and is_digit(x[1])) 
     except:
@@ -102,14 +98,18 @@ def csv_pipe_warning(x):
         raise Exception('File contains a |')
 
 
+def get_index_of_terms(x):
+    return [x.find(term) for term in search_terms if x.find(term) != -1]
+
+
 def split_info(info):
     x = info.lower()
-    index_of_terms = [x.find(term) for term in search_terms if x.find(term) != -1]
+    index_of_terms = get_index_of_terms(x)
     if len(index_of_terms) == 0:
         raise Exception('No matching target found: \n' + info + '\n')
     start_of_targets = min(index_of_terms)
     index_of_first_space = x.find(' ')
-    
+
     number = info[:index_of_first_space]
     corp_name = info[(index_of_first_space + 1):(start_of_targets - 1)]
     targets = info[start_of_targets:]
@@ -126,6 +126,37 @@ def add_num_corp_name_targets_to_lobbyist(l):
         firm['targets'] = targets
     return lobbyist
 
+
+def process_more_info(f):
+    firm = f.copy()
+    if 'more_info' in firm:
+        index_of_terms = get_index_of_terms(firm['more_info'].lower())
+        if len(index_of_terms) == 0:
+            # no search terms found -> more_info is corp name
+            firm['corp_name'] = firm['corp_name'] + ' ' + firm['more_info']
+        else:  # terms are found
+            if min(index_of_terms) == 0:  # more_info is targets
+                firm['targets'] = firm['targets'] + ' ' + firm['more_info']
+            else:  # more_info is both
+                firm['corp_name'] = firm['corp_name'] + ' ' + firm['more_info'][0: min(index_of_terms) - 1]
+                firm['targets'] = firm['targets'] + ' ' + firm['more_info'][min(index_of_terms):]
+    return firm  # always return firm
+    
+
+def update_firms(l):
+    lobbyist = l.copy()
+    for firm in lobbyist['firms']:
+        lobbyist['firms'] = process_more_info(firm)
+    return lobbyist
+
+def update_lobbyists():
+    global lobbyists
+    lobbyists = list(map(update_firms, map(add_num_corp_name_targets_to_lobbyist, lobbyists)))
+
+
+def save_csv():
+    for lobbyist in lobbyists:
+        lobbyist = add_num_corp_name_targets_to_lobbyist(lobbyist)
 
 
 def lobbyists_missing():
@@ -151,7 +182,7 @@ def parser(text, lobbyist, prior_corp=False):
         lobbyist['firms'].append(corp_info)
         return parser(text[1:], lobbyist, prior_corp=True)
     elif is_garbage(text[0]):
-        return parser(text[1:], lobbyist, prior_corp=prior_corp) # ignore line 
+        return parser(text[1:], lobbyist, prior_corp=prior_corp)  # ignore line
     elif prior_corp:
         # add additional info
         lobbyist['firms'][len(lobbyist['firms']) - 1]['more_info'] = text[0]
@@ -165,11 +196,12 @@ def main():
         text = f.read()
         csv_pipe_warning(text)
         parser(text.split('\n'), {})
+        update_lobbyists()
         save_json()
         print('Recorded', len(lobbyists), 'lobbyists')
         print('Total firms:', total_firms())
         print('lobbyists missing:', len(lobbyists_missing()))
         print(lobbyists_missing())
-    
+
 if __name__ == '__main__':
-    main()    
+    main()

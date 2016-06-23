@@ -180,6 +180,43 @@ class Test_add_num_corp_name_targets_to_lobbyist(unittest.TestCase):
         self.assertEqual(result['firms'][0]['targets'], "Board of Supervisors, Treasurer-Tax Collector")
         
     
+class Test_process_more_info(unittest.TestCase):
+    f = {'number': '1006', 'info': '1006 Statue of Responsibility Board of Supervisors, Treasurer-Tax Collector', 'targets': 'Board of Supervisors, Treasurer-Tax Collector', 'corp_corp_name': 'Statue of Responsibility'}
+        
+
+    def test_returns_firm_if_no_more_info(self):
+        self.assertEqual(process_more_info(self.f), self.f)
+        
+    def test_more_info_is_part_of_corp_name(self):
+        firm = {'number': '1', 'targets': 'Board of Supervisors', 'corp_name': 'Mega Corp', 'info': '1 Mega Corp Board of Supervisors', 'more_info': 'INC'}
+        self.assertEqual(process_more_info(firm)['corp_name'], 'Mega Corp INC')
+
+    def test_more_info_is_part_of_targets(self):
+        firm = {'number': '1', 'targets': 'Board of Supervisors', 'corp_name': 'Mega Corp', 'info': '1 Mega Corp Board of Supervisors', 'more_info': 'BOS'}
+        _f = process_more_info(firm)
+        self.assertEqual(_f['corp_name'], 'Mega Corp')
+        self.assertEqual(_f['targets'], 'Board of Supervisors BOS')
+
+    def test_more_info_is_part_of_corp_name_2(self):
+        firm ={
+                "info": "507 San Diego County All Possible County",
+                "corp_name": "San Diego County",
+                "number": "507",
+                "targets": "All Possible County",
+                "more_info": "Apartment Association"
+        }
+        self.assertEqual(firm['corp_name'], "San Diego County")
+        firm = process_more_info(firm)
+        self.assertEqual(firm['corp_name'], "San Diego County Apartment Association")
+        
+
+    def test_more_info_contains_both(self):
+        firm = {'number': '1', 'targets': 'Board of Supervisors', 'corp_name': 'Mega Corp', 'info': '1 Mega Corp Board of Supervisors', 'more_info':'INC BOS'}
+        _f = process_more_info(firm)
+        self.assertEqual(_f['corp_name'], 'Mega Corp INC')
+        self.assertEqual(_f['targets'], 'Board of Supervisors BOS')
+
+
 
 
 class Test_csv_pipe_warning(unittest.TestCase):
