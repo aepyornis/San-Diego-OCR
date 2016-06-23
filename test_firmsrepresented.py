@@ -182,7 +182,7 @@ class Test_add_num_corp_name_targets_to_lobbyist(unittest.TestCase):
         
     
 class Test_process_more_info(unittest.TestCase):
-    f = {'number': '1006', 'info': '1006 Statue of Responsibility Board of Supervisors, Treasurer-Tax Collector', 'targets': 'Board of Supervisors, Treasurer-Tax Collector', 'corp_corp_name': 'Statue of Responsibility'}
+    f = {'number': '1006', 'info': '1006 Statue of Responsibility Board of Supervisors, Treasurer-Tax Collector', 'targets': 'Board of Supervisors, Treasurer-Tax Collector', 'corp_name': 'Statue of Responsibility'}
         
 
     def test_returns_firm_if_no_more_info(self):
@@ -216,8 +216,6 @@ class Test_process_more_info(unittest.TestCase):
         _f = process_more_info(firm)
         self.assertEqual(_f['corp_name'], 'Mega Corp INC')
         self.assertEqual(_f['targets'], 'Board of Supervisors BOS')
-
-
 
 
 class Test_csv_pipe_warning(unittest.TestCase):

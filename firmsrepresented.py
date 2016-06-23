@@ -88,6 +88,19 @@ def save_json():
     with open('firmsrepresented.json', 'w') as f:
         f.write(json.dumps(lobbyists, indent=4))
 
+def save_csv():
+    with open('firmsrepresented.csv', 'w') as f:
+        f.write('lobbyist|id|firm_represented|targets\n')
+        for lobbyist in lobbyists:
+            for firm in lobbyist['firms']:
+                f.write(lobbyist['name'])
+                f.write('|')
+                f.write(firm['number'])
+                f.write('|')
+                f.write(firm['corp_name'])
+                f.write('|')
+                f.write(firm['targets'])
+                f.write('\n')
 
 def total_firms():
     return sum([len(x['firms']) for x in lobbyists])
@@ -145,18 +158,13 @@ def process_more_info(f):
 
 def update_firms(l):
     lobbyist = l.copy()
-    for firm in lobbyist['firms']:
-        lobbyist['firms'] = process_more_info(firm)
+    for i, firm in enumerate(lobbyist['firms']):
+        lobbyist['firms'][i] = process_more_info(firm)
     return lobbyist
 
 def update_lobbyists():
     global lobbyists
     lobbyists = list(map(update_firms, map(add_num_corp_name_targets_to_lobbyist, lobbyists)))
-
-
-def save_csv():
-    for lobbyist in lobbyists:
-        lobbyist = add_num_corp_name_targets_to_lobbyist(lobbyist)
 
 
 def lobbyists_missing():
@@ -200,6 +208,7 @@ def main():
         parser(text.split('\n'), {})
         update_lobbyists()
         save_json()
+        save_csv()
         print('Recorded', len(lobbyists), 'lobbyists')
         print('Total firms:', total_firms())
         print('lobbyists missing:', len(lobbyists_missing()))
