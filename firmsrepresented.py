@@ -88,7 +88,7 @@ def is_blank_line(x):
     return x == ""
 
 
-def save():
+def save_json():
     with open('firmsrepresented.json', 'w') as f:
         f.write(json.dumps(lobbyists, indent=4))
 
@@ -115,7 +115,24 @@ def split_info(info):
     targets = info[start_of_targets:]
 
     return (number, corp_name, targets)
-    
+
+
+def add_num_corp_name_targets_to_lobbyist(l):
+    lobbyist = l.copy()
+    for firm in lobbyist['firms']:
+        number, corp_name, targets = split_info(firm['info'])
+        firm['number'] = number
+        firm['corp_name'] = corp_name
+        firm['targets'] = targets
+    return lobbyist
+
+
+
+def lobbyists_missing():
+    names = set(lobbyist_names.split(','))
+    lobbyist_in_firms_dataset = set([last_name(l['name']).lower() for l in lobbyists])
+    return names - lobbyist_in_firms_dataset
+
 
 # text: array of lines
 # lobbyist: dictionary
@@ -141,11 +158,18 @@ def parser(text, lobbyist, prior_corp=False):
         return parser(text[1:], lobbyist, prior_corp=True)
     else:
         return parser(text[1:], lobbyist)
-    
-if __name__ == '__main__':
+
+
+def main():
     with open('firmsrepresented.txt', 'r') as f:
-        parser(f.read().split('\n'), {})
-        save()
+        text = f.read()
+        csv_pipe_warning(text)
+        parser(text.split('\n'), {})
+        save_json()
         print('Recorded', len(lobbyists), 'lobbyists')
         print('Total firms:', total_firms())
-        
+        print('lobbyists missing:', len(lobbyists_missing()))
+        print(lobbyists_missing())
+    
+if __name__ == '__main__':
+    main()    

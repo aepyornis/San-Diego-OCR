@@ -164,6 +164,24 @@ class Test_split_info(unittest.TestCase):
             split_info('666 the devil, inc. god')
 
 
+class Test_add_num_corp_name_targets_to_lobbyist(unittest.TestCase):
+    john = {"name": "Alexander. John Scott","firms": [{"info": "1006 Statue of Responsibility Board of Supervisors, Treasurer-Tax Collector"}]}
+
+    def test_adds_num(self):
+        result = add_num_corp_name_targets_to_lobbyist(self.john)
+        self.assertEqual(result['firms'][0]['number'], "1006")
+        
+    def test_adds_corp_name(self):
+        result = add_num_corp_name_targets_to_lobbyist(self.john)
+        self.assertEqual(result['firms'][0]['corp_name'], "Statue of Responsibility")
+
+    def test_adds_targets(self):
+        result = add_num_corp_name_targets_to_lobbyist(self.john)
+        self.assertEqual(result['firms'][0]['targets'], "Board of Supervisors, Treasurer-Tax Collector")
+        
+    
+
+
 class Test_csv_pipe_warning(unittest.TestCase):
     def test_raises(self):
         with self.assertRaises(Exception):
